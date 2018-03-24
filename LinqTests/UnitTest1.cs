@@ -4,6 +4,7 @@ using LinqTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Policy;
 
 namespace LinqTests
 {
@@ -75,6 +76,23 @@ namespace LinqTests
 
             expected.ToExpectedObject().ShouldEqual(actual.ToList());
         }
+
+        [TestMethod]
+        public void find_urls_should_return_startwith_https()
+        {
+            var urls = RepositoryFactory.GetUrls();
+            var actual = WithoutLinq.Tohttps(urls);
+
+            var expected = new List<string>()
+            {
+                "https://tw.yahoo.com",
+                "https://facebook.com",
+                "https://twitter.com",
+                "https://github.com",
+            };
+
+            expected.ToExpectedObject().ShouldEqual(actual.ToList());
+        }
     }
 }
 
@@ -82,48 +100,59 @@ internal static class WithoutLinq
 {
     public static IEnumerable<T> FindResult<T>(this IEnumerable<T> sources, Func<T, bool> predicate)
     {
-        foreach (var source in sources)
+        foreach (var item in sources)
         {
-            if (predicate(source))
+            if (predicate(item))
             {
-                yield return source;
+                yield return item;
             }
         }
     }
     public static IEnumerable<T> FindSourceofIndex<T>(this IEnumerable<T> sources, Func<T, int, bool> predicate)
     {
-        for (int index = 0; index < sources.Count(); index++)
+        var index = 0;
+
+        foreach (var item in sources)
         {
-            if (predicate(sources.ElementAt(index), index))
+            if (predicate(item, index))
             {
-                yield return sources.ElementAt(index);
+                yield return item;
             }
+            index++;
         }
     }
 
+    internal static IEnumerable<string> Tohttps(IEnumerable<string> urls)
+    {
+        foreach (var url in urls)
+        {
+            yield return url.Replace("http:", "https:");
+        }
+    }
 }
 
 internal static class YourOwnLinq
 {
-    public static IEnumerable<T> AthenaWhere<T>(this IEnumerable<T> sources, Func<T, bool> predicate)
+    public static IEnumerable<TSource> AthenaWhere<TSource>(this IEnumerable<TSource> sources, Predicate<TSource> predicate)
     {
-        foreach (var source in sources)
+        var enumerator = sources.GetEnumerator();
+        while (enumerator.MoveNext())
         {
-            if (predicate(source))
-            {
-                yield return source;
-            }
+            yield return enumerator.Current;
         }
     }
 
-    public static IEnumerable<T> AthenaWhereofIndex<T>(this IEnumerable<T> sources, Func<T, int, bool> predicate)
+    public static IEnumerable<TSource> AthenaWhereofIndex<TSource>(this IEnumerable<TSource> sources, Func<TSource, int, bool> predicate)
     {
-        for (int index = 0; index < sources.Count(); index++)
+        var index = 0;
+
+        foreach (var item in sources)
         {
-            if (predicate(sources.ElementAt(index),index))
+            if (predicate(item, index))
             {
-                yield return sources.ElementAt(index);
+                yield return item;
             }
         }
+        index++;
     }
 }
