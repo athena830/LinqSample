@@ -13,11 +13,10 @@ namespace LinqTests
         public void find_products_that_price_between_200_and_500()
         {
             var products = RepositoryFactory.GetProducts();
-            var actual = WithoutLinq.FindProductByPrice(products, 200, 500);
+            var actual = WithoutLinq.FindProductByPrice(products, 200, 500, 30);
 
             var expected = new List<Product>()
             {
-                new Product{Id=2, Cost=21, Price=210, Supplier="Yahoo" },
                 new Product{Id=3, Cost=31, Price=310, Supplier="Odd-e" },
                 new Product{Id=4, Cost=41, Price=410, Supplier="Odd-e" },
             };
@@ -46,11 +45,11 @@ namespace LinqTests
 
 internal class WithoutLinq
 {
-    public static IEnumerable<Product> FindProductByPrice(IEnumerable<Product> products, int lowBoundary, int highBoundary)
+    public static IEnumerable<Product> FindProductByPrice(IEnumerable<Product> products, int lowBoundary, int highBoundary, int costBoundary)
     {
         foreach (var product in products)
         {
-            if (product.Price < highBoundary && product.Price>lowBoundary)
+            if (product.Price < highBoundary && product.Price>lowBoundary && product.Cost > costBoundary)
             {
                 yield return product;
             }
