@@ -28,11 +28,10 @@ namespace LinqTests
         public void find_products_that_price_between_200_and_500_by_where()
         {
             var products = RepositoryFactory.GetProducts();
-            var actual = products.Where(x => x.Price < 500 && x.Price > 200);
+            var actual = products.Where(x => x.Price < 500 && x.Price > 200 && x.Cost>30);
 
             var expected = new List<Product>()
             {
-                new Product{Id=2, Cost=21, Price=210, Supplier="Yahoo" },
                 new Product{Id=3, Cost=31, Price=310, Supplier="Odd-e" },
                 new Product{Id=4, Cost=41, Price=410, Supplier="Odd-e" },
             };
