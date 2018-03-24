@@ -112,7 +112,14 @@ namespace LinqTests
         public void find_employee_that_age_lower_then_25_should_show_role_name()
         {
             var employees = RepositoryFactory.GetEmployees();
-            var actual = employees.AthenaWhere(x => x.Age < 25).AthenaSelect(x => $"{x.Role}:{x.Name}");
+            var actual = employees
+                .AthenaWhere(x => x.Age < 25)
+                .AthenaSelect(x => $"{x.Role}:{x.Name}");
+
+            foreach (var item in actual)
+            {
+                Console.WriteLine(item);
+            }
 
             var expected = new List<string>()
             {
@@ -137,6 +144,7 @@ internal static class WithoutLinq
             }
         }
     }
+
     public static IEnumerable<T> FindSourceofIndex<T>(this IEnumerable<T> sources, Func<T, int, bool> predicate)
     {
         var index = 0;
