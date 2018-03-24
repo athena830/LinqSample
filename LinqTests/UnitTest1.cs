@@ -303,9 +303,11 @@ internal static class YourOwnLinq
     {
         var rowIndex = 0;
 
-        yield return source.Skip(0).Take(pageSize).Sum(sumFunc);
-        yield return source.Skip(rowIndex + pageSize).Take(pageSize).Sum(sumFunc);
-        yield return source.Skip(rowIndex + pageSize + pageSize).Take(source.Count() - pageSize - pageSize).Sum(sumFunc);
+        while (rowIndex < source.Count())
+        {
+            yield return source.AthenaSkip(rowIndex).AthenaTake(pageSize).Sum(sumFunc);
+            rowIndex+=pageSize;
+        }
     }
 
 }
