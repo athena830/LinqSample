@@ -121,8 +121,8 @@ namespace LinqTests
                 .AthenaSelect(x => $"{x.Role}:{x.Name}");
 
             var sqlActual = from e in employees
-                where e.Age < 25
-                select $"{e.Role} : {e.Name}";
+                            where e.Age < 25
+                            select $"{e.Role} : {e.Name}";
 
 
             foreach (var item in actual)
@@ -164,6 +164,22 @@ namespace LinqTests
             {
                 new Employee{Name="Frank", Role=RoleType.Engineer, MonthSalary=120, Age=16, WorkingYear=2.6} ,
                 new Employee{Name="Joey", Role=RoleType.Engineer, MonthSalary=250, Age=40, WorkingYear=2.6},
+            };
+
+            expected.ToExpectedObject().ShouldEqual(actual.ToList());
+        }
+
+        [TestMethod]
+        public void get_employee_that_group_3_and_sum_monthsalary()
+        {
+            var employees = RepositoryFactory.GetEmployees();
+            var actual = employees.AthenaGroupBy(3, e => e.MonthSalary);
+
+            var expected = new List<int>()
+            {
+                620,
+                540,
+                370,
             };
 
             expected.ToExpectedObject().ShouldEqual(actual.ToList());
@@ -282,4 +298,30 @@ internal static class YourOwnLinq
             index++;
         }
     }
+
+    public static IEnumerable<int> AthenaGroupBy<TSource>(this IEnumerable<TSource> source, int pageSize, Func<TSource, int> sumFunc)
+    {
+        var enumerator = source.GetEnumerator();
+        var index = 0;
+        var sumNum = 0;
+
+        while (enumerator.MoveNext())
+        {
+            sumNum += sumFunc(enumerator.Current);
+
+            if (index % pageSize == 2)
+            {
+                yield return sumNum;
+                sumNum = 0;
+            }
+
+            index++;
+        }
+        if (sumNum > 0)
+        {
+            yield return sumNum;
+            sumNum = 0;
+        }
+    }
+
 }
