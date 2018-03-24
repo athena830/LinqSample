@@ -14,7 +14,7 @@ namespace LinqTests
         public void find_products_that_price_between_200_and_500()
         {
             var products = RepositoryFactory.GetProducts();
-            var actual = WithoutLinq.FindProductByPrice(products, product => product.Price < 500 && product.Price>200 && product.Cost > 30);
+            var actual = products.FindProduct(product => product.Price < 500 && product.Price>200 && product.Cost > 30);
 
             var expected = new List<Product>()
             {
@@ -45,9 +45,9 @@ namespace LinqTests
     }
 }
 
-internal class WithoutLinq
+internal static class WithoutLinq
 {
-    public static IEnumerable<Product> FindProductByPrice(IEnumerable<Product> products, Func<Product, bool> predicate)
+    public static IEnumerable<Product> FindProduct(this IEnumerable<Product> products, Func<Product, bool> predicate)
     {
         foreach (var product in products)
         {
