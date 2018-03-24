@@ -112,7 +112,7 @@ namespace LinqTests
         public void find_employee_that_age_lower_then_25_should_show_role_name()
         {
             var employees = RepositoryFactory.GetEmployees();
-            var actual = employees.AthenaWhere(x => x.Age < 25).AthenaSelect(x => string.Format("{0}:{1}",x.Role,x.Name));
+            var actual = employees.AthenaWhere(x => x.Age < 25).AthenaSelect(x => $"{x.Role}:{x.Name}");
 
             var expected = new List<string>()
             {
