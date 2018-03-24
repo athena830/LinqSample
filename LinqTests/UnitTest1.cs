@@ -153,6 +153,21 @@ namespace LinqTests
 
             expected.ToExpectedObject().ShouldEqual(actual.ToList());
         }
+
+        [TestMethod]
+        public void find_employee_that_over_6()
+        {
+            var employees = RepositoryFactory.GetEmployees();
+            var actual = employees.AthenaSkip(6);
+
+            var expected = new List<Employee>()
+            {
+                new Employee{Name="Frank", Role=RoleType.Engineer, MonthSalary=120, Age=16, WorkingYear=2.6} ,
+                new Employee{Name="Joey", Role=RoleType.Engineer, MonthSalary=250, Age=40, WorkingYear=2.6},
+            };
+
+            expected.ToExpectedObject().ShouldEqual(actual.ToList());
+        }
     }
 }
 
@@ -237,21 +252,34 @@ internal static class YourOwnLinq
 
     public static IEnumerable<TSource> AthenaTake<TSource>(this IEnumerable<TSource> source, int count)
     {
+        var enumerator = source.GetEnumerator();
         var index = 0;
-        var enumerable = source.GetEnumerator();
-        while (enumerable.MoveNext())
+
+        while (enumerator.MoveNext())
         {
-            if (index < count)
-            {
-                yield return enumerable.Current;
-            }
-            else
+            if (index >= count)
             {
                 yield break;
+            }
+
+            yield return enumerator.Current;
+            index++;
+        }
+    }
+
+    public static IEnumerable<TSource> AthenaSkip<TSource>(this IEnumerable<TSource> source, int count)
+    {
+        var enumerator = source.GetEnumerator();
+        var index = 0;
+
+        while (enumerator.MoveNext())
+        {
+            if (index >= count)
+            {
+                yield return enumerator.Current;
             }
 
             index++;
         }
     }
-
 }
