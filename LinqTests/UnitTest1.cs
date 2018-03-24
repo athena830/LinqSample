@@ -1,4 +1,5 @@
-﻿using ExpectedObjects;
+﻿using System;
+using ExpectedObjects;
 using LinqTests;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
@@ -13,10 +14,11 @@ namespace LinqTests
         public void find_products_that_price_between_200_and_500()
         {
             var products = RepositoryFactory.GetProducts();
-            var actual = WithoutLinq.FindProductByPrice(products, 200, 500, 30);
+            var actual = WithoutLinq.FindProductByPrice(products, product => product.Price < 500 && product.Price>200 && product.Cost > 30);
 
             var expected = new List<Product>()
             {
+                //new Product{Id=2, Cost=21, Price=210, Supplier="Yahoo" },
                 new Product{Id=3, Cost=31, Price=310, Supplier="Odd-e" },
                 new Product{Id=4, Cost=41, Price=410, Supplier="Odd-e" },
             };
@@ -32,6 +34,7 @@ namespace LinqTests
 
             var expected = new List<Product>()
             {
+                //new Product{Id=2, Cost=21, Price=210, Supplier="Yahoo" },
                 new Product{Id=3, Cost=31, Price=310, Supplier="Odd-e" },
                 new Product{Id=4, Cost=41, Price=410, Supplier="Odd-e" },
             };
@@ -44,11 +47,11 @@ namespace LinqTests
 
 internal class WithoutLinq
 {
-    public static IEnumerable<Product> FindProductByPrice(IEnumerable<Product> products, int lowBoundary, int highBoundary, int costBoundary)
+    public static IEnumerable<Product> FindProductByPrice(IEnumerable<Product> products, Func<Product, bool> predicate)
     {
         foreach (var product in products)
         {
-            if (product.Price < highBoundary && product.Price>lowBoundary && product.Cost > costBoundary)
+            if (predicate(product))
             {
                 yield return product;
             }
