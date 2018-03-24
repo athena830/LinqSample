@@ -15,7 +15,7 @@ namespace LinqTests
         public void find_products_that_price_between_200_and_500()
         {
             var products = RepositoryFactory.GetProducts();
-            var actual = products.FindResult(product => product.Price < 500 && product.Price>200 && product.Cost > 30);
+            var actual = products.FindResult(product => product.Price < 500 && product.Price > 200 && product.Cost > 30);
 
             var expected = new List<Product>()
             {
@@ -31,7 +31,7 @@ namespace LinqTests
         public void find_products_that_price_between_200_and_500_by_where()
         {
             var products = RepositoryFactory.GetProducts();
-            var actual = products.Where(x => x.Price < 500 && x.Price > 200 && x.Cost>30);
+            var actual = products.Where(x => x.Price < 500 && x.Price > 200 && x.Cost > 30);
 
             var expected = new List<Product>()
             {
@@ -65,7 +65,7 @@ namespace LinqTests
         public void find_employees_that_index()
         {
             var employees = RepositoryFactory.GetEmployees();
-            var actual = employees.FindSourceofIndex((employee, index) => employee.Age > 30 && index >1);
+            var actual = employees.FindSourceofIndex((employee, index) => employee.Age > 30 && index > 1);
 
             var expected = new List<Employee>()
             {
@@ -108,6 +108,20 @@ namespace LinqTests
             expected.ToExpectedObject().ShouldEqual(actual.ToList());
         }
 
+        [TestMethod]
+        public void find_employee_that_age_lower_then_25_should_show_role_name()
+        {
+            var employees = RepositoryFactory.GetEmployees();
+            var actual = employees.AthenaWhere(x => x.Age < 25).AthenaSelect(x => string.Format("{0}:{1}",x.Role,x.Name));
+
+            var expected = new List<string>()
+            {
+                "OP:Andy",
+                "Engineer:Frank",
+            };
+
+            expected.ToExpectedObject().ShouldEqual(actual.ToList());
+        }
     }
 }
 
@@ -158,10 +172,12 @@ internal static class YourOwnLinq
 {
     public static IEnumerable<TSource> AthenaWhere<TSource>(this IEnumerable<TSource> sources, Predicate<TSource> predicate)
     {
-        var enumerator = sources.GetEnumerator();
-        while (enumerator.MoveNext())
+        foreach (var item in sources)
         {
-            yield return enumerator.Current;
+            if (predicate(item))
+            {
+                yield return item;
+            }
         }
     }
 
@@ -177,5 +193,13 @@ internal static class YourOwnLinq
             }
         }
         index++;
+    }
+
+    public static IEnumerable<TResult> AthenaSelect<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> selector)
+    {
+        foreach (var item in source)
+        {
+            yield return selector(item);
+        }
     }
 }
