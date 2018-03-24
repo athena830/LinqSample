@@ -14,7 +14,7 @@ namespace LinqTests
         public void find_products_that_price_between_200_and_500()
         {
             var products = RepositoryFactory.GetProducts();
-            var actual = products.FindProduct(product => product.Price < 500 && product.Price>200 && product.Cost > 30);
+            var actual = products.FindResult(product => product.Price < 500 && product.Price>200 && product.Cost > 30);
 
             var expected = new List<Product>()
             {
@@ -42,23 +42,88 @@ namespace LinqTests
             expected.ToExpectedObject().ShouldEqual(actual.ToList());
         }
 
+        [TestMethod]
+        public void find_employees_that_age_higher_30()
+        {
+            var employees = RepositoryFactory.GetEmployees();
+            var actual = employees.FindResult(employee => employee.Age > 30);
+
+            var expected = new List<Employee>()
+            {
+                new Employee{Name="Joe", Role=RoleType.Engineer, MonthSalary=100, Age=44, WorkingYear=2.6 } ,
+                new Employee{Name="Tom", Role=RoleType.Engineer, MonthSalary=140, Age=33, WorkingYear=2.6} ,
+                new Employee{Name="Kevin", Role=RoleType.Manager, MonthSalary=380, Age=55, WorkingYear=2.6} ,
+                new Employee{Name="Bas", Role=RoleType.Engineer, MonthSalary=280, Age=36, WorkingYear=2.6} ,
+                new Employee{Name="Joey", Role=RoleType.Engineer, MonthSalary=250, Age=40, WorkingYear=2.6},
+            };
+
+            expected.ToExpectedObject().ShouldEqual(actual.ToList());
+        }
+
+        [TestMethod]
+        public void find_employees_that_index()
+        {
+            var employees = RepositoryFactory.GetEmployees();
+            var actual = employees.FindSourceofIndex((employee, index) => employee.Age > 30 && index >1);
+
+            var expected = new List<Employee>()
+            {
+                new Employee{Name="Kevin", Role=RoleType.Manager, MonthSalary=380, Age=55, WorkingYear=2.6} ,
+                new Employee{Name="Bas", Role=RoleType.Engineer, MonthSalary=280, Age=36, WorkingYear=2.6} ,
+                new Employee{Name="Joey", Role=RoleType.Engineer, MonthSalary=250, Age=40, WorkingYear=2.6},
+            };
+
+            expected.ToExpectedObject().ShouldEqual(actual.ToList());
+        }
     }
 }
 
 internal static class WithoutLinq
 {
-    public static IEnumerable<Product> FindProduct(this IEnumerable<Product> products, Func<Product, bool> predicate)
+    public static IEnumerable<T> FindResult<T>(this IEnumerable<T> sources, Func<T, bool> predicate)
     {
-        foreach (var product in products)
+        foreach (var source in sources)
         {
-            if (predicate(product))
+            if (predicate(source))
             {
-                yield return product;
+                yield return source;
             }
         }
     }
+    public static IEnumerable<T> FindSourceofIndex<T>(this IEnumerable<T> sources, Func<T, int, bool> predicate)
+    {
+        for (int index = 0; index < sources.Count(); index++)
+        {
+            if (predicate(sources.ElementAt(index), index))
+            {
+                yield return sources.ElementAt(index);
+            }
+        }
+    }
+
 }
 
-internal class YourOwnLinq
+internal static class YourOwnLinq
 {
+    public static IEnumerable<T> AthenaWhere<T>(this IEnumerable<T> sources, Func<T, bool> predicate)
+    {
+        foreach (var source in sources)
+        {
+            if (predicate(source))
+            {
+                yield return source;
+            }
+        }
+    }
+
+    public static IEnumerable<T> AthenaWhereofIndex<T>(this IEnumerable<T> sources, Func<T, int, bool> predicate)
+    {
+        for (int index = 0; index < sources.Count(); index++)
+        {
+            if (predicate(sources.ElementAt(index),index))
+            {
+                yield return sources.ElementAt(index);
+            }
+        }
+    }
 }
