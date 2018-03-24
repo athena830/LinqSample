@@ -200,7 +200,23 @@ namespace LinqTests
             expected.ToExpectedObject().ShouldEqual(actual.ToList());
         }
 
+        [TestMethod]
+        public void get_employee_that_monthsalary_smaller_150_skip_3()
+        {
+            var employees = RepositoryFactory.GetEmployees();
+            var actual = employees.AthenaSkipWhile(3, e => e.MonthSalary < 150);
 
+            var expected = new List<Employee>()
+            {
+                new Employee{Name="Kevin", Role=RoleType.Manager, MonthSalary=380, Age=55, WorkingYear=2.6} ,
+                new Employee{Name="Bas", Role=RoleType.Engineer, MonthSalary=280, Age=36, WorkingYear=2.6} ,
+                new Employee{Name="Mary", Role=RoleType.OP, MonthSalary=180, Age=26, WorkingYear=2.6} ,
+                new Employee{Name="Frank", Role=RoleType.Engineer, MonthSalary=120, Age=16, WorkingYear=2.6} ,
+                new Employee{Name="Joey", Role=RoleType.Engineer, MonthSalary=250, Age=40, WorkingYear=2.6},
+            };
+
+            expected.ToExpectedObject().ShouldEqual(actual.ToList());
+        }
     }
 }
 
@@ -344,4 +360,23 @@ internal static class YourOwnLinq
         //yield return source.AthenaWhere(predicate).AthenaTake(count);
 
     }
+
+    public static IEnumerable<TSource> AthenaSkipWhile<TSource>(this IEnumerable<TSource> source, int count, Func<TSource, bool> predicate)
+    {
+        var enumerator = source.GetEnumerator();
+        var skipCount = 0;
+
+        while (enumerator.MoveNext())
+        {
+            if (skipCount < count && predicate(enumerator.Current))
+            {
+                skipCount++;
+            }
+            else
+            {
+                yield return enumerator.Current;
+            }
+        }
+    }
+
 }
