@@ -184,6 +184,23 @@ namespace LinqTests
 
             expected.ToExpectedObject().ShouldEqual(actual.ToList());
         }
+
+        [TestMethod]
+        public void get_employee_that_monthsalary_bigger_150_and_top_2()
+        {
+            var employees = RepositoryFactory.GetEmployees();
+            var actual = employees.AthenaTakeWhile(2, e => e.MonthSalary > 150);
+
+            var expected = new List<Employee>()
+            {
+                new Employee{Name="Kevin", Role=RoleType.Manager, MonthSalary=380, Age=55, WorkingYear=2.6} ,
+                new Employee{Name="Bas", Role=RoleType.Engineer, MonthSalary=280, Age=36, WorkingYear=2.6} ,
+            };
+
+            expected.ToExpectedObject().ShouldEqual(actual.ToList());
+        }
+
+
     }
 }
 
@@ -233,7 +250,7 @@ internal static class WithoutLinq
 
 internal static class YourOwnLinq
 {
-    public static IEnumerable<TSource> AthenaWhere<TSource>(this IEnumerable<TSource> sources, Predicate<TSource> predicate)
+    public static IEnumerable<TSource> AthenaWhere<TSource>(this IEnumerable<TSource> sources, Func<TSource, bool> predicate)
     {
         foreach (var item in sources)
         {
@@ -310,4 +327,21 @@ internal static class YourOwnLinq
         }
     }
 
+    public static IEnumerable<TSource> AthenaTakeWhile<TSource>(this IEnumerable<TSource> source, int count, Func<TSource,bool> predicate)
+    {
+        var enumerator = source.GetEnumerator();
+        var index = 0;
+
+        while (enumerator.MoveNext() && index < count)
+        {
+            if (predicate(enumerator.Current))
+            {
+                yield return enumerator.Current;
+                index++;
+            }
+        }
+
+        //yield return source.AthenaWhere(predicate).AthenaTake(count);
+
+    }
 }
