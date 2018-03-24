@@ -301,27 +301,11 @@ internal static class YourOwnLinq
 
     public static IEnumerable<int> AthenaGroupBy<TSource>(this IEnumerable<TSource> source, int pageSize, Func<TSource, int> sumFunc)
     {
-        var enumerator = source.GetEnumerator();
-        var index = 0;
-        var sumNum = 0;
+        var rowIndex = 0;
 
-        while (enumerator.MoveNext())
-        {
-            sumNum += sumFunc(enumerator.Current);
-
-            if (index % pageSize == 2)
-            {
-                yield return sumNum;
-                sumNum = 0;
-            }
-
-            index++;
-        }
-        if (sumNum > 0)
-        {
-            yield return sumNum;
-            sumNum = 0;
-        }
+        yield return source.Skip(0).Take(pageSize).Sum(sumFunc);
+        yield return source.Skip(rowIndex + pageSize).Take(pageSize).Sum(sumFunc);
+        yield return source.Skip(rowIndex + pageSize + pageSize).Take(source.Count() - pageSize - pageSize).Sum(sumFunc);
     }
 
 }
